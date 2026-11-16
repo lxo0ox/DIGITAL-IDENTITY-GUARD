@@ -1,45 +1,146 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Digital Identity Guard – an awareness tool that explains the warning signs of fake and impersonating accounts.">
 <title>حارس الهوية الرقمية | Digital Identity Guard</title>
-<style>
-:root{--bg:#101b2c;--panel:#1b2d42;--muted:#b6c8d8;--teal:#19b7a5;--line:#365064}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f4f8fb;font-family:Arial,Tahoma,sans-serif;line-height:1.7}
-main{max-width:900px;margin:auto;padding:18px}.hero{padding:26px;border-radius:18px;background:linear-gradient(135deg,#10283b,#15515b)}
-h1{font-size:clamp(22px,4vw,32px);margin:0}.sub{color:#c5e8e6}.hero p,.muted{color:var(--muted)}
-nav{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}button{cursor:pointer;border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:var(--panel);color:white;font-size:14px}
-button.active,.primary{background:#108b7e;border-color:#108b7e}.primary{font-weight:bold;width:100%;margin-top:12px}
-section{background:var(--panel);border:1px solid var(--line);padding:18px;border-radius:15px;margin:12px 0}
-.hidden{display:none}.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}.tile{background:#243b50;padding:14px;border-radius:12px}
-label.check{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}input[type=checkbox]{width:18px;accent-color:var(--teal)}
-input[type=text]{width:100%;padding:12px;border-radius:9px;border:1px solid var(--line);background:#102235;color:white;margin:8px 0}
-.muted{font-size:13px}.meter{height:11px;background:#102235;border-radius:20px;overflow:hidden}.meter div{height:100%;width:0;background:var(--teal)}
-.result{font-size:34px;font-weight:bold}.tag{display:inline-block;padding:3px 10px;border-radius:20px;background:#155e5540;color:#5ce0ce;font-size:12px}
-footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
-</style></head>
-<body><main>
-<div class="hero"><div style="font-size:36px">🛡️</div><h1>DIGITAL IDENTITY GUARD</h1><div class="sub">حارس الهوية الرقمية</div><h2 style="margin-top:25px">احمِ هويتك الرقمية</h2><p>اكتشف مؤشرات الحسابات المشبوهة، وافهم علامات انتحال الهوية قبل التفاعل مع الحسابات غير المألوفة.</p><button class="primary" id="start">ابدأ فحص حساب ←</button></div>
-<nav><button class="active" data-page="home">الرئيسية</button><button data-page="scan">فحص الحساب</button><button data-page="about">عن المشروع</button><button data-page="tips">نصائح الحماية</button></nav>
-<section id="home"><h2>مرحبًا بك في حارس الهوية الرقمية</h2><div class="tiles"><div class="tile">🔍 <b>فحص الحسابات</b><div class="muted">مراجعة مؤشرات الحساب.</div></div><div class="tile">🧠 <b>التحليل الذكي</b><div class="muted">دراسة عدة علامات معًا.</div></div><div class="tile">📊 <b>تقرير الاشتباه</b><div class="muted">شرح مستوى التنبيه.</div></div><div class="tile">🔐 <b>الحماية</b><div class="muted">إرشادات الأمن الرقمي.</div></div></div><p>يهدف المشروع إلى توعية المستخدمين بمؤشرات انتحال الهوية ومساعدتهم على اتخاذ قرارات أكثر أمانًا.</p></section>
-<section id="scan" class="hidden"><h2>🔎 فحص الحساب</h2><p class="muted">أدخل اسم المستخدم أو رابط الملف العام، ثم حدد المؤشرات التي لاحظتها.</p><label for="account">رابط الحساب أو اسم المستخدم</label><input id="account" type="text" placeholder="@username أو رابط الحساب">
-<h3>حدد المؤشرات التي لاحظتها</h3>
-<div id="checks">
-<label class="check"><input type="checkbox" value="20"><span><b>الحساب حديث الإنشاء</b><div class="muted">عمر الحساب قصير.</div></span></label>
-<label class="check"><input type="checkbox" value="25"><span><b>نشاط غير طبيعي</b><div class="muted">تكرار أو نمط نشاط غير معتاد.</div></span></label>
-<label class="check"><input type="checkbox" value="20"><span><b>اسم مستخدم مريب</b><div class="muted">يشبه اسم حساب آخر أو ينتحل هويته.</div></span></label>
-<label class="check"><input type="checkbox" value="20"><span><b>صورة شخصية مشبوهة</b><div class="muted">احتمال استخدام صورة شخص آخر.</div></span></label>
-<label class="check"><input type="checkbox" value="15"><span><b>طلب معلومات حساسة</b><div class="muted">طلب كلمة مرور أو بيانات خاصة.</div></span></label></div>
-<button class="primary" id="analyze">تحليل المؤشرات</button>
-<div id="report" class="tile hidden" style="margin-top:16px"><span class="tag">تقرير تجريبي</span><h3>نتيجة التحليل</h3><div class="result" id="score">0%</div><div class="meter"><div id="bar"></div></div><h3 id="risk"></h3><p id="explanation" class="muted"></p><p id="warning"></p><button id="reset">فحص جديد</button></div>
-<p class="muted">تنبيه: النسبة مؤشر تجريبي مبني على أوزان افتراضية، وليست احتمالًا حقيقيًا للاحتيال أو حكمًا على صاحب الحساب.</p></section>
-<section id="about" class="hidden"><h2>عن المشروع</h2><div class="tile"><b>المقدمة</b><p>حارس الهوية الرقمية تطبيق مقترح يعتمد على تحليل مؤشرات الحسابات المتاحة علنًا، بهدف توعية المستخدمين بعلامات انتحال الهوية والنشاط المشبوه.</p></div><div class="tile" style="margin-top:10px"><b>منهجية العمل</b><ol><li>إدخال رابط الحساب أو اسم المستخدم.</li><li>مراجعة المؤشرات المتاحة.</li><li>تحليل الأنماط.</li><li>إنتاج مستوى اشتباه مع تفسير الأسباب.</li><li>تقديم نصائح للمستخدم.</li></ol></div><div class="tile" style="margin-top:10px"><b>الابتكار</b><p>الجمع بين عدة مؤشرات وتفسير أسباب الاشتباه بدلًا من عرض تصنيف فقط.</p></div><div class="tile" style="margin-top:10px"><b>النتائج المتوقعة</b><p>زيادة الوعي بالاحتيال الإلكتروني ومساعدة المستخدم على فهم العلامات التحذيرية.</p></div><div class="tile" style="margin-top:10px"><b>العمل المستقبلي</b><p>اختبار النظام على بيانات مصرح بها، وقياس الدقة، وتحسين حماية الخصوصية.</p></div></section>
-<section id="tips" class="hidden"><h2>🔐 نصائح لحماية هويتك</h2><div class="tile"><b>🔑 لا تشارك كلمة المرور</b><p class="muted">حتى لو طلبها حساب يدّعي أنه جهة رسمية.</p></div><div class="tile"><b>🔒 فعّل المصادقة الثنائية</b><p class="muted">أضف طبقة حماية إضافية لحساباتك.</p></div><div class="tile"><b>🔍 تحقق من هوية الحساب</b><p class="muted">راجع الحساب من خلال الموقع الرسمي للجهة.</p></div><div class="tile"><b>🚫 لا تفتح الروابط المشبوهة</b><p class="muted">تجنب الروابط التي تطلب معلومات شخصية.</p></div><div class="tile"><b>📢 أبلغ عن الانتحال</b><p class="muted">استخدم أدوات الإبلاغ الرسمية في المنصة.</p></div></section>
-<footer>🛡️ DIGITAL IDENTITY GUARD<br>Yazan Omar Alzahrani · Mohannad Ali Alghamdi<br>مشروع طلابي – إبداع 2026</footer>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main>
+  <div class="topbar">
+    <button type="button" class="lang-btn" id="lang" data-i18n="lang.switch">English</button>
+  </div>
+
+  <header class="hero">
+    <div class="logo" aria-hidden="true">🛡️</div>
+    <h1>DIGITAL IDENTITY GUARD</h1>
+    <div class="sub" data-i18n="brand.sub">حارس الهوية الرقمية</div>
+    <h2 data-i18n="hero.title">احمِ هويتك الرقمية</h2>
+    <p data-i18n="hero.text"></p>
+    <button type="button" class="primary" id="start" data-i18n="hero.cta"></button>
+  </header>
+
+  <nav aria-label="Main">
+    <button type="button" class="active" data-page="home" data-i18n="nav.home"></button>
+    <button type="button" data-page="scan" data-i18n="nav.scan"></button>
+    <button type="button" data-page="about" data-i18n="nav.about"></button>
+    <button type="button" data-page="tips" data-i18n="nav.tips"></button>
+  </nav>
+
+  <!-- Home -->
+  <section id="home">
+    <h2 data-i18n="home.title"></h2>
+    <div class="tiles">
+      <div class="tile">🔍 <b data-i18n="home.t1"></b><div class="muted" data-i18n="home.t1d"></div></div>
+      <div class="tile">🧠 <b data-i18n="home.t2"></b><div class="muted" data-i18n="home.t2d"></div></div>
+      <div class="tile">📊 <b data-i18n="home.t3"></b><div class="muted" data-i18n="home.t3d"></div></div>
+      <div class="tile">🔐 <b data-i18n="home.t4"></b><div class="muted" data-i18n="home.t4d"></div></div>
+    </div>
+    <p data-i18n="home.text"></p>
+    <p class="privacy" data-i18n="home.privacy"></p>
+  </section>
+
+  <!-- Scan -->
+  <section id="scan" class="hidden">
+    <h2 data-i18n="scan.title"></h2>
+    <p class="muted" data-i18n="scan.intro"></p>
+
+    <form id="scan-form" novalidate>
+      <label class="field" for="account" data-i18n="scan.accountLabel"></label>
+      <input id="account" class="ltr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+             data-i18n-ph="scan.accountPh" aria-describedby="account-error">
+      <p class="error" id="account-error" role="alert"></p>
+
+      <label class="field" for="expected" data-i18n="scan.expectedLabel"></label>
+      <input id="expected" class="ltr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+             data-i18n-ph="scan.expectedPh" aria-describedby="expected-hint">
+      <p class="muted" id="expected-hint" data-i18n="scan.expectedHint"></p>
+
+      <h3 data-i18n="scan.signsTitle"></h3>
+      <div id="checks">
+        <label class="check"><input type="checkbox" value="new_account"><span><b data-i18n="sign.new_account"></b><div class="muted" data-i18n="sign.new_account.d"></div></span><span class="pts" data-pts="new_account"></span></label>
+        <label class="check"><input type="checkbox" value="unusual_activity"><span><b data-i18n="sign.unusual_activity"></b><div class="muted" data-i18n="sign.unusual_activity.d"></div></span><span class="pts" data-pts="unusual_activity"></span></label>
+        <label class="check"><input type="checkbox" value="suspicious_username"><span><b data-i18n="sign.suspicious_username"></b><div class="muted" data-i18n="sign.suspicious_username.d"></div></span><span class="pts" data-pts="suspicious_username"></span></label>
+        <label class="check"><input type="checkbox" value="suspicious_photo"><span><b data-i18n="sign.suspicious_photo"></b><div class="muted" data-i18n="sign.suspicious_photo.d"></div></span><span class="pts" data-pts="suspicious_photo"></span></label>
+        <label class="check"><input type="checkbox" value="sensitive_request"><span><b data-i18n="sign.sensitive_request"></b><div class="muted" data-i18n="sign.sensitive_request.d"></div></span><span class="pts" data-pts="sensitive_request"></span></label>
+      </div>
+
+      <button type="submit" class="primary" id="analyze" data-i18n="scan.analyze"></button>
+    </form>
+
+    <div id="report" class="tile report hidden" tabindex="-1" aria-live="polite">
+      <span class="tag" data-i18n="report.tag"></span>
+      <h3 data-i18n="report.title"></h3>
+      <div class="result" id="score">0%</div>
+      <div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="meter"><div id="bar"></div></div>
+      <h3 id="risk"></h3>
+
+      <h3 data-i18n="report.detected"></h3>
+      <dl class="detected" id="detected"></dl>
+
+      <h3 data-i18n="report.why"></h3>
+      <ul class="factors" id="factors"></ul>
+      <div id="caps"></div>
+
+      <div id="checks-block">
+        <h3 data-i18n="report.checks"></h3>
+        <ul class="checks" id="auto-checks"></ul>
+      </div>
+
+      <h3 data-i18n="report.advice"></h3>
+      <p class="advice" id="advice"></p>
+
+      <div class="report-actions"><button type="button" id="reset" data-i18n="report.reset"></button></div>
+    </div>
+
+    <p class="muted" data-i18n="scan.disclaimer"></p>
+  </section>
+
+  <!-- About -->
+  <section id="about" class="hidden">
+    <h2 data-i18n="about.title"></h2>
+    <div class="stack">
+      <div class="tile"><b data-i18n="about.intro"></b><p data-i18n="about.introText"></p></div>
+      <div class="tile"><b data-i18n="about.method"></b>
+        <ol>
+          <li data-i18n="about.m1"></li>
+          <li data-i18n="about.m2"></li>
+          <li data-i18n="about.m3"></li>
+          <li data-i18n="about.m4"></li>
+          <li data-i18n="about.m5"></li>
+        </ol>
+      </div>
+      <div class="tile"><b data-i18n="about.innov"></b><p data-i18n="about.innovText"></p></div>
+      <div class="tile"><b data-i18n="about.results"></b><p data-i18n="about.resultsText"></p></div>
+      <div class="tile"><b data-i18n="about.future"></b><p data-i18n="about.futureText"></p></div>
+    </div>
+  </section>
+
+  <!-- Tips -->
+  <section id="tips" class="hidden">
+    <h2 data-i18n="tips.title"></h2>
+    <div class="tiles">
+      <div class="tile"><b data-i18n="tips.1"></b><p class="muted" data-i18n="tips.1d"></p></div>
+      <div class="tile"><b data-i18n="tips.2"></b><p class="muted" data-i18n="tips.2d"></p></div>
+      <div class="tile"><b data-i18n="tips.3"></b><p class="muted" data-i18n="tips.3d"></p></div>
+      <div class="tile"><b data-i18n="tips.4"></b><p class="muted" data-i18n="tips.4d"></p></div>
+      <div class="tile"><b data-i18n="tips.5"></b><p class="muted" data-i18n="tips.5d"></p></div>
+      <div class="tile"><b data-i18n="tips.6"></b><p class="muted" data-i18n="tips.6d"></p></div>
+    </div>
+  </section>
+
+  <footer>
+    🛡️ DIGITAL IDENTITY GUARD<br>
+    Yazan Omar Alzahrani · Mohannad Ali Alghamdi<br>
+    <span data-i18n="footer.project"></span>
+  </footer>
 </main>
-<script>
-const pages=['home','scan','about','tips'];function show(p){pages.forEach(x=>document.getElementById(x).classList.toggle('hidden',x!==p));document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===p));}
-document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>show(b.dataset.page));document.getElementById('start').onclick=()=>show('scan');
-document.getElementById('analyze').onclick=()=>{let a=document.getElementById('account').value.trim();if(!a){alert('يرجى إدخال اسم الحساب أولًا');return;}let cs=[...document.querySelectorAll('#checks input:checked')],s=cs.reduce((n,c)=>n+ +c.value,0),r=s>=60?'مرتفع':s>=30?'متوسط':'منخفض';document.getElementById('score').textContent=s+'%';document.getElementById('bar').style.width=s+'%';document.getElementById('bar').style.background=s>=60?'#dc6262':s>=30?'#d6a342':'#19b7a5';document.getElementById('risk').textContent='مستوى الاشتباه: '+r;document.getElementById('explanation').textContent=cs.length?'المؤشرات المحددة: '+cs.map(c=>c.parentElement.innerText.split('\n')[0]).join('، '):'لم يتم تحديد مؤشرات تحذيرية. غياب العلامات المحددة لا يثبت سلامة الحساب.';document.getElementById('warning').textContent=s>=60?'توجد عدة علامات تستحق التحقق بعناية. تجنب مشاركة معلوماتك الحساسة.':s>=30?'توجد علامات تستحق المراجعة والتحقق من هوية الحساب.':'المؤشرات المحددة قليلة، لكن تحقق دائمًا قبل الوثوق بالحساب.';document.getElementById('report').classList.remove('hidden');};
-document.getElementById('reset').onclick=()=>{document.querySelectorAll('#checks input').forEach(c=>c.checked=false);document.getElementById('account').value='';document.getElementById('report').classList.add('hidden');};
-</script></body></html>
+
+<script src="js/analyzer.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
