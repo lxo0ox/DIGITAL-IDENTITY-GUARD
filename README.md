@@ -1,26 +1,54 @@
 # 🛡️ Digital Identity Guard · حارس الهوية الرقمية
 
-An awareness tool that helps people spot the warning signs of fake and impersonating social-media accounts, and explains *why* each sign matters.
+An awareness tool that answers two questions about an unfamiliar social-media account:
+
+1. **Is this account really who it claims to be?**
+2. **Is it trying to scam me?**
 
 Student project – Ebdaa 2026 · Yazan Omar Alzahrani · Mohannad Ali Alghamdi
 
 ## Run it
 
-Open `index.html` in any browser. There is no build step and no server: all analysis runs in the browser and nothing you type is sent anywhere.
+Open `index.html` in any browser. There is no build step and no server: every check runs in the browser and nothing you type is sent anywhere. The site never contacts Instagram, X or any other platform.
 
-## How the check works
+## How a check works
 
-1. **Automatic checks** on the username or link you enter:
-   - look-alike letters from other alphabets (e.g. Cyrillic `у` instead of `y`) and hidden zero-width characters
-   - words that pretend to be official (`official`, `support`, `verify`, platform names…)
-   - long digit runs, unusual separators, random-looking strings
-   - comparison with the real account you expected: catches `yazan_0mar` vs `yazan_omar`, `rn` vs `m`, one-letter differences and extra suffixes
-   - links: imitation domains (`instagrarn.com`, `instagram-login.net`), `xn--` domains, IP addresses, URL shorteners, non-https links
-2. **Your observations**: account age, activity, photo, requests for sensitive data (same weights as the original prototype).
-3. **Combined signs**: extra points when certain signs appear together (e.g. a suspicious name **and** a request for a password).
-4. **Group caps** stop the same underlying sign from being counted twice.
+The user enters the account (link or @username) and, optionally, who it claims to be, the verification badge they see, the messages it sent, and anything they noticed.
 
-The report lists every reason with its points. The percentage is a trial indicator built on assumed weights, not a real probability of fraud.
+| Check | What it does | File |
+| --- | --- | --- |
+| **Identity** | Compares the account with the organisation's official accounts (from the directory) or with the real account's link the user pastes. A match only counts on the **same platform**. Catches look-alikes such as `yazan_0mar` vs `yazan_omar`. | `js/guard.js` |
+| **Badge** | Explains what the badge means on that platform. On X, blue = paid subscription, gold = verified organisation, grey = government. On Instagram/Facebook, blue can be Meta Verified (paid). | `js/guard.js` |
+| **Messages** | Arabic and English. Requests for a verification code, password, PIN or card details are *decisive*. Money requests, threats, urgency, prizes, investment offers, "my new number", moving to WhatsApp, and dangerous links are warning signs. A genuine SMS that says "do not share this code" is not flagged. | `js/messages.js` |
+| **Supporting signs** | Look-alike letters, hidden characters, official-sounding words, imitation domains, shortened links, plus the signs the user ticked. Context only. | `js/analyzer.js` |
+
+### Result levels (most serious first)
+
+| Level | When |
+| --- | --- |
+| 🚨 Scam behaviour detected | Asks for a code, password or card details, or uses a phishing link |
+| ⛔ Not the official account | Claims to be someone, but is not their official account |
+| ⚠️ Several warning signs | Several message or profile warning signs together |
+| ✅ Official account | Matches the official account on the same platform, nothing else wrong |
+| 🟢 No warning signs found | Nothing found, which is not proof the account is safe |
+
+## The official accounts directory
+
+`js/official-accounts.js` lists organisations people often get impersonated as (banks, government, telecom). **The account lists start empty on purpose.** A wrong handle there would tell users that a scam account is official, so:
+
+1. Open the organisation's **own website** (the address in the file).
+2. Find its social-media links, usually the icons at the bottom of the page.
+3. Add each one with the page you found it on and the date:
+
+```js
+accounts: [
+  { platform: 'x', handle: 'ExampleBank', source: 'https://www.example.com.sa/en/contact', checked: '2026-11-20' },
+],
+```
+
+Accounts without a `source` are ignored. Never copy handles from search results, news articles or other directories. Re-check the list before presenting the project, because organisations do change their handles.
+
+Until an organisation's accounts are added, users can still confirm an account by pasting the official link from the organisation's website into "Who does it claim to be?".
 
 ## Files
 
@@ -28,10 +56,14 @@ The report lists every reason with its points. The percentage is a trial indicat
 | --- | --- |
 | `index.html` | Page structure |
 | `css/style.css` | Styles (RTL/LTR, mobile) |
-| `js/analyzer.js` | Analysis engine (no DOM, also runs in Node) |
+| `js/analyzer.js` | Username and link checks |
+| `js/messages.js` | Message scam analyser |
+| `js/official-accounts.js` | Official accounts directory |
+| `js/guard.js` | Identity and badge checks, final result |
 | `js/i18n.js` | Arabic and English text |
-| `js/app.js` | Navigation, language switch, report rendering |
-| `tests/analyzer.test.js` | Engine tests |
+| `js/app.js` | Navigation, language switch, examples, report |
+| `tests/` | Tests for the checks |
+| `docs/` | Project methodology document |
 
 ## Tests
 

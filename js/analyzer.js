@@ -185,7 +185,7 @@
   function parseAccount(input) {
     const raw = String(input || '').trim();
     const result = { raw, kind: 'handle', url: null, host: null, platform: null,
-      username: '', scheme: null };
+      platformId: null, username: '', scheme: null };
     if (!raw) return result;
 
     if (raw.startsWith('@') || !looksLikeLink(raw)) {
@@ -207,6 +207,7 @@
     result.host = stripHostPrefix(url.hostname.toLowerCase());
     const platform = platformFor(result.host);
     result.platform = platform ? platform.name : null;
+    result.platformId = platform ? platform.id : null;
 
     if (platform) {
       const segs = url.pathname.split('/').filter(Boolean).map((s) => {
@@ -303,9 +304,10 @@
   // ----------------------------------------------------------- analysis ---
 
   /**
+   * Name/link checks plus the signs the user ticked (the supporting signals).
    * @param {{account: string, expected?: string, manual?: string[]}} input
    */
-  function analyze(input) {
+  function analyzeSignals(input) {
     const parsed = parseAccount(input.account);
     const expectedParsed = input.expected ? parseAccount(input.expected) : null;
     const expectedName = expectedParsed ? (expectedParsed.username || '') : '';
@@ -377,7 +379,7 @@
   }
 
   return {
-    analyze, parseAccount, checkUsername, checkLink, compareWithExpected,
+    analyzeSignals, analyze: analyzeSignals, parseAccount, cleanName, PLATFORMS, checkUsername, checkLink, compareWithExpected,
     skeleton, levenshtein,
     MANUAL, AUTO, GROUP_CAPS, PATTERNS, LEVELS,
   };

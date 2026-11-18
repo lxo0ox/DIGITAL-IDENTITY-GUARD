@@ -48,50 +48,79 @@
     <h2 data-i18n="scan.title"></h2>
     <p class="muted" data-i18n="scan.intro"></p>
 
+    <div class="examples">
+      <span class="muted" data-i18n="scan.examples"></span>
+      <button type="button" class="chip" data-example="1" data-i18n="ex.1"></button>
+      <button type="button" class="chip" data-example="2" data-i18n="ex.2"></button>
+      <button type="button" class="chip" data-example="3" data-i18n="ex.3"></button>
+    </div>
+
     <form id="scan-form" novalidate>
-      <label class="field" for="account" data-i18n="scan.accountLabel"></label>
-      <input id="account" class="ltr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
-             data-i18n-ph="scan.accountPh" aria-describedby="account-error">
-      <p class="error" id="account-error" role="alert"></p>
+      <fieldset>
+        <legend data-i18n="scan.step1"></legend>
+        <label class="field" for="account" data-i18n="scan.accountLabel"></label>
+        <input id="account" class="ltr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+               data-i18n-ph="scan.accountPh" aria-describedby="account-error">
+        <p class="error" id="account-error" role="alert"></p>
 
-      <label class="field" for="expected" data-i18n="scan.expectedLabel"></label>
-      <input id="expected" class="ltr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
-             data-i18n-ph="scan.expectedPh" aria-describedby="expected-hint">
-      <p class="muted" id="expected-hint" data-i18n="scan.expectedHint"></p>
+        <label class="field" for="claim" data-i18n="scan.claimLabel"></label>
+        <input id="claim" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" list="orgs"
+               data-i18n-ph="scan.claimPh" aria-describedby="claim-hint">
+        <datalist id="orgs"></datalist>
+        <p class="muted" id="claim-hint" data-i18n="scan.claimHint"></p>
+      </fieldset>
 
-      <h3 data-i18n="scan.signsTitle"></h3>
-      <div id="checks">
-        <label class="check"><input type="checkbox" value="new_account"><span><b data-i18n="sign.new_account"></b><div class="muted" data-i18n="sign.new_account.d"></div></span><span class="pts" data-pts="new_account"></span></label>
-        <label class="check"><input type="checkbox" value="unusual_activity"><span><b data-i18n="sign.unusual_activity"></b><div class="muted" data-i18n="sign.unusual_activity.d"></div></span><span class="pts" data-pts="unusual_activity"></span></label>
-        <label class="check"><input type="checkbox" value="suspicious_username"><span><b data-i18n="sign.suspicious_username"></b><div class="muted" data-i18n="sign.suspicious_username.d"></div></span><span class="pts" data-pts="suspicious_username"></span></label>
-        <label class="check"><input type="checkbox" value="suspicious_photo"><span><b data-i18n="sign.suspicious_photo"></b><div class="muted" data-i18n="sign.suspicious_photo.d"></div></span><span class="pts" data-pts="suspicious_photo"></span></label>
-        <label class="check"><input type="checkbox" value="sensitive_request"><span><b data-i18n="sign.sensitive_request"></b><div class="muted" data-i18n="sign.sensitive_request.d"></div></span><span class="pts" data-pts="sensitive_request"></span></label>
-      </div>
+      <fieldset>
+        <legend data-i18n="scan.step2"></legend>
+        <p class="field-q" id="badge-q" data-i18n="scan.badgeLabel"></p>
+        <div class="badges" role="radiogroup" aria-labelledby="badge-q">
+          <label class="badge-opt"><input type="radio" name="badge" value="unsure" checked><span data-i18n="badge.unsure"></span></label>
+          <label class="badge-opt"><input type="radio" name="badge" value="none"><span data-i18n="badge.none"></span></label>
+          <label class="badge-opt"><input type="radio" name="badge" value="blue"><i class="dot dot-blue" aria-hidden="true"></i><span data-i18n="badge.blue"></span></label>
+          <label class="badge-opt"><input type="radio" name="badge" value="gold"><i class="dot dot-gold" aria-hidden="true"></i><span data-i18n="badge.gold"></span></label>
+          <label class="badge-opt"><input type="radio" name="badge" value="grey"><i class="dot dot-grey" aria-hidden="true"></i><span data-i18n="badge.grey"></span></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend data-i18n="scan.step3"></legend>
+        <label class="field" for="messages" data-i18n="scan.messagesLabel"></label>
+        <textarea id="messages" rows="5" dir="auto" data-i18n-ph="scan.messagesPh" aria-describedby="messages-hint"></textarea>
+        <p class="muted" id="messages-hint" data-i18n="scan.messagesHint"></p>
+      </fieldset>
+
+      <fieldset>
+        <legend data-i18n="scan.step4"></legend>
+        <div id="checks">
+          <label class="check"><input type="checkbox" value="new_account"><span><b data-i18n="sign.new_account"></b><div class="muted" data-i18n="sign.new_account.d"></div></span></label>
+          <label class="check"><input type="checkbox" value="unusual_activity"><span><b data-i18n="sign.unusual_activity"></b><div class="muted" data-i18n="sign.unusual_activity.d"></div></span></label>
+          <label class="check"><input type="checkbox" value="suspicious_username"><span><b data-i18n="sign.suspicious_username"></b><div class="muted" data-i18n="sign.suspicious_username.d"></div></span></label>
+          <label class="check"><input type="checkbox" value="suspicious_photo"><span><b data-i18n="sign.suspicious_photo"></b><div class="muted" data-i18n="sign.suspicious_photo.d"></div></span></label>
+          <label class="check"><input type="checkbox" value="sensitive_request"><span><b data-i18n="sign.sensitive_request"></b><div class="muted" data-i18n="sign.sensitive_request.d"></div></span></label>
+        </div>
+      </fieldset>
 
       <button type="submit" class="primary" id="analyze" data-i18n="scan.analyze"></button>
     </form>
 
-    <div id="report" class="tile report hidden" tabindex="-1" aria-live="polite">
-      <span class="tag" data-i18n="report.tag"></span>
-      <h3 data-i18n="report.title"></h3>
-      <div class="result" id="score">0%</div>
-      <div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="meter"><div id="bar"></div></div>
-      <h3 id="risk"></h3>
-
-      <h3 data-i18n="report.detected"></h3>
-      <dl class="detected" id="detected"></dl>
-
-      <h3 data-i18n="report.why"></h3>
-      <ul class="factors" id="factors"></ul>
-      <div id="caps"></div>
-
-      <div id="checks-block">
-        <h3 data-i18n="report.checks"></h3>
-        <ul class="checks" id="auto-checks"></ul>
+    <div id="report" class="report hidden" tabindex="-1" aria-live="polite">
+      <div class="verdict" id="verdict">
+        <span class="tag" data-i18n="report.tag"></span>
+        <h3 id="v-title"></h3>
+        <p id="v-desc"></p>
+        <div id="v-notes"></div>
+        <div class="advice"><b data-i18n="v.whatToDo"></b><p id="v-action"></p></div>
       </div>
 
-      <h3 data-i18n="report.advice"></h3>
-      <p class="advice" id="advice"></p>
+      <div class="rsec">
+        <h3 data-i18n="report.detected"></h3>
+        <dl class="detected" id="detected"></dl>
+      </div>
+      <div class="rsec"><h3 data-i18n="sec.identity"></h3><div id="r-identity"></div></div>
+      <div class="rsec" id="r-badge-sec"><h3 data-i18n="sec.badge"></h3><div id="r-badge"></div></div>
+      <div class="rsec"><h3 data-i18n="sec.messages"></h3><ul class="factors" id="r-messages"></ul></div>
+      <div class="rsec"><h3 data-i18n="sec.signals"></h3><ul class="factors" id="r-signals"></ul></div>
+      <div class="rsec" id="checks-block"><h3 data-i18n="report.checks"></h3><ul class="checks" id="auto-checks"></ul></div>
 
       <div class="report-actions"><button type="button" id="reset" data-i18n="report.reset"></button></div>
     </div>
@@ -140,6 +169,9 @@
 </main>
 
 <script src="js/analyzer.js"></script>
+<script src="js/messages.js"></script>
+<script src="js/official-accounts.js"></script>
+<script src="js/guard.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/app.js"></script>
 </body>
