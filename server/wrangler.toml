@@ -1,0 +1,22 @@
+# Cloudflare Worker settings for the screenshot reader.
+# The API key is NOT here: add it as a secret with
+#   npx wrangler secret put ANTHROPIC_API_KEY
+name = "dig-screenshot-reader"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# Websites allowed to use this reader (comma-separated, no trailing slash).
+ALLOWED_ORIGINS = "https://lxo0ox.github.io"
+# How hard Claude works on each screenshot: low | medium | high
+EFFORT = "high"
+
+# At most 10 screenshots per visitor per minute.
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 10
+  period = 60

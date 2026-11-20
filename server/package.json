@@ -1,0 +1,13 @@
+{
+  "name": "dig-screenshot-reader",
+  "private": true,
+  "type": "module",
+  "description": "Cloudflare Worker that reads screenshots for Digital Identity Guard using the Claude API",
+  "scripts": {
+    "test": "node --test",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "1.6.0"
+  }
+}

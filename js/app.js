@@ -100,6 +100,7 @@
   document.querySelectorAll('[data-example]').forEach((b) => b.addEventListener('click', () => {
     const ex = EXAMPLES[b.dataset.example];
     $('scan-form').reset();
+    clearShots();
     $('account').value = ex.account;
     $('claim').value = ex.claim();
     $('messages').value = ex.messages();
@@ -225,6 +226,132 @@
     renderSignals(r);
   }
 
+  // ---------------------------------------------------- screenshots ---
+
+  const V = window.DIGVision;
+  const shotUrls = [];
+  let shotQueue = Promise.resolve();
+
+  function appendText(text) {
+    const box = $('messages');
+    box.value = box.value.trim() ? box.value.trim() + '\n\n' + text : text;
+  }
+
+  function showCandidates(accounts) {
+    const wrap = $('shot-cands');
+    accounts.forEach((acc) => {
+      if (!acc || [...wrap.children].some((b) => b.dataset.value === acc)) return;
+      const b = el('button', { type: 'button', class: 'chip', 'data-value': acc }, [bdi(acc)]);
+      b.addEventListener('click', () => {
+        $('account').value = acc;
+        $('account').dispatchEvent(new Event('input'));
+        $('account').focus();
+      });
+      wrap.append(b);
+    });
+    $('shot-found').classList.toggle('hidden', !wrap.children.length);
+  }
+
+  function summary(r, form) {
+    const dl = el('dl', { class: 'shot-dl' });
+    const row = (k, v) => dl.append(el('dt', { text: t(k) }), el('dd', {}, [v]));
+    row('shot.platform', r.platform === 'unknown' ? t('report.platformUnknown') : bdi(platformName(r.platform)));
+    if (r.account.username) row('shot.username', bdi(handleText(r.account.username)));
+    const badge = ['none', 'blue', 'gold', 'grey'].includes(r.badge) ? t('badge.' + r.badge) : t('shot.badgeUnclear');
+    row('shot.badge', badge);
+    row('shot.messages', String(form.fromThem));
+    return dl;
+  }
+
+  function readShot(file) {
+    const url = URL.createObjectURL(file);
+    shotUrls.push(url);
+    const status = el('span', { class: 'shot-status', text: t('shot.reading') });
+    const bar = el('div', { class: 'shot-bar busy' }, [el('div')]);
+    const info = el('div', { class: 'shot-info' }, [el('span', { class: 'shot-name', text: file.name || 'screenshot' }), status, bar]);
+    const li = el('li', { class: 'shot' }, [el('img', { src: url, alt: '' }), info]);
+    $('shot-list').append(li);
+
+    if (!/^image\//.test(file.type)) {
+      status.textContent = t('shot.notImage');
+      li.classList.add('shot-failed');
+      bar.remove();
+      return;
+    }
+
+    // One screenshot at a time, in the order they were added.
+    shotQueue = shotQueue.then(async () => {
+      try {
+        const r = await V.read(file);
+        const form = V.toForm(r);
+        bar.remove();
+        status.textContent = t('shot.done');
+        li.classList.add('shot-ok');
+        info.append(summary(r, form));
+        if (r.account.username_uncertain) info.append(el('p', { class: 'shot-warn', text: t('shot.uncertain') }));
+        if (r.unclear) info.append(el('p', { class: 'muted', text: t('shot.unclear', { text: r.unclear }) }));
+        if (r.badge_is_emoji) info.append(el('p', { class: 'shot-warn', text: t('shot.emojiBadge') }));
+
+        if (form.account) {
+          if (!$('account').value.trim()) $('account').value = form.account;
+          showCandidates([form.account]);
+        }
+        if (form.badge) {
+          const radio = document.querySelector(`input[name=badge][value=${form.badge}]`);
+          if (radio) radio.checked = true;
+        }
+        if (form.text) appendText(form.text);
+      } catch (e) {
+        bar.remove();
+        status.textContent = t('shot.err.' + (e.code || 'other'));
+        li.classList.add('shot-failed');
+      }
+    });
+  }
+
+  function addFiles(files) {
+    if (!V.enabled()) return;
+    [...files].slice(0, 6).forEach(readShot);
+  }
+
+  if (!V.enabled()) {
+    $('shots').disabled = true;
+    $('drop').classList.add('off');
+    $('drop').append(el('p', { class: 'shot-off', 'data-i18n': 'shot.off', text: t('shot.off') }));
+  }
+
+  $('shots').addEventListener('change', (e) => {
+    addFiles(e.target.files);
+    e.target.value = '';
+  });
+
+  const drop = $('drop');
+  ['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => {
+    e.preventDefault();
+    if (V.enabled()) drop.classList.add('drag');
+  }));
+  ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, () => drop.classList.remove('drag')));
+  drop.addEventListener('drop', (e) => {
+    e.preventDefault();
+    if (e.dataTransfer && e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+  });
+
+  // Paste a screenshot straight from the clipboard while on the scan page.
+  document.addEventListener('paste', (e) => {
+    if ($('scan').classList.contains('hidden') || !e.clipboardData) return;
+    const images = [...e.clipboardData.files].filter((f) => /^image\//.test(f.type));
+    if (!images.length || !V.enabled()) return;
+    e.preventDefault();
+    addFiles(images);
+  });
+
+  function clearShots() {
+    shotUrls.splice(0).forEach((u) => URL.revokeObjectURL(u));
+    $('shot-list').replaceChildren();
+    $('shot-cands').replaceChildren();
+    $('shot-found').classList.add('hidden');
+  }
+
   // ------------------------------------------------------- form flow ---
 
   let lastInput = {};
@@ -265,6 +392,7 @@
 
   $('reset').addEventListener('click', () => {
     $('scan-form').reset();
+    clearShots();
     lastResult = null;
     lastInput = {};
     $('report').classList.add('hidden');
