@@ -228,6 +228,7 @@
 
   // ---------------------------------------------------- screenshots ---
 
+  const V = window.DIGVision;
   const shotUrls = [];
   let shotQueue = Promise.resolve();
 
@@ -239,7 +240,7 @@
   function showCandidates(accounts) {
     const wrap = $('shot-cands');
     accounts.forEach((acc) => {
-      if ([...wrap.children].some((b) => b.dataset.value === acc)) return;
+      if (!acc || [...wrap.children].some((b) => b.dataset.value === acc)) return;
       const b = el('button', { type: 'button', class: 'chip', 'data-value': acc }, [bdi(acc)]);
       b.addEventListener('click', () => {
         $('account').value = acc;
@@ -251,15 +252,24 @@
     $('shot-found').classList.toggle('hidden', !wrap.children.length);
   }
 
+  function summary(r, form) {
+    const dl = el('dl', { class: 'shot-dl' });
+    const row = (k, v) => dl.append(el('dt', { text: t(k) }), el('dd', {}, [v]));
+    row('shot.platform', r.platform === 'unknown' ? t('report.platformUnknown') : bdi(platformName(r.platform)));
+    if (r.account.username) row('shot.username', bdi(handleText(r.account.username)));
+    const badge = ['none', 'blue', 'gold', 'grey'].includes(r.badge) ? t('badge.' + r.badge) : t('shot.badgeUnclear');
+    row('shot.badge', badge);
+    row('shot.messages', String(form.fromThem));
+    return dl;
+  }
+
   function readShot(file) {
     const url = URL.createObjectURL(file);
     shotUrls.push(url);
-    const status = el('span', { class: 'shot-status' });
-    const bar = el('div', { class: 'shot-bar' }, [el('div')]);
-    const li = el('li', { class: 'shot' }, [
-      el('img', { src: url, alt: '' }),
-      el('div', { class: 'shot-info' }, [el('span', { class: 'shot-name', text: file.name || 'screenshot' }), status, bar]),
-    ]);
+    const status = el('span', { class: 'shot-status', text: t('shot.reading') });
+    const bar = el('div', { class: 'shot-bar busy' }, [el('div')]);
+    const info = el('div', { class: 'shot-info' }, [el('span', { class: 'shot-name', text: file.name || 'screenshot' }), status, bar]);
+    const li = el('li', { class: 'shot' }, [el('img', { src: url, alt: '' }), info]);
     $('shot-list').append(li);
 
     if (!/^image\//.test(file.type)) {
@@ -268,39 +278,46 @@
       bar.remove();
       return;
     }
-    status.textContent = t('shot.loading', { p: 0 });
 
     // One screenshot at a time, in the order they were added.
     shotQueue = shotQueue.then(async () => {
       try {
-        const res = await window.DIGOcr.read(file, (stage, p) => {
-          const pct = Math.round(p * 100);
-          status.textContent = t('shot.' + stage, { p: pct });
-          bar.firstChild.style.width = (stage === 'reading' ? pct : Math.min(pct, 100) / 4) + '%';
-        });
+        const r = await V.read(file);
+        const form = V.toForm(r);
         bar.remove();
-        if (!res.text) {
-          status.textContent = t('shot.empty');
-          li.classList.add('shot-failed');
-          return;
-        }
-        appendText(res.text);
-        status.textContent = t('shot.done', { n: res.text.split('\n').length });
+        status.textContent = t('shot.done');
         li.classList.add('shot-ok');
-        // Fill the account only when exactly one @username or link was found.
-        if (!$('account').value.trim() && res.accounts.sure.length === 1) $('account').value = res.accounts.sure[0];
-        showCandidates(res.accounts.sure.concat(res.accounts.maybe));
-        if (!li.querySelector('.shot-note')) li.querySelector('.shot-info').append(el('span', { class: 'shot-note muted', text: t('shot.badgeNote') }));
+        info.append(summary(r, form));
+        if (r.account.username_uncertain) info.append(el('p', { class: 'shot-warn', text: t('shot.uncertain') }));
+        if (r.unclear) info.append(el('p', { class: 'muted', text: t('shot.unclear', { text: r.unclear }) }));
+        if (r.badge_is_emoji) info.append(el('p', { class: 'shot-warn', text: t('shot.emojiBadge') }));
+
+        if (form.account) {
+          if (!$('account').value.trim()) $('account').value = form.account;
+          showCandidates([form.account]);
+        }
+        if (form.badge) {
+          const radio = document.querySelector(`input[name=badge][value=${form.badge}]`);
+          if (radio) radio.checked = true;
+        }
+        if (form.text) appendText(form.text);
       } catch (e) {
         bar.remove();
-        status.textContent = t('shot.error');
+        status.textContent = t('shot.err.' + (e.code || 'other'));
         li.classList.add('shot-failed');
       }
     });
   }
 
   function addFiles(files) {
+    if (!V.enabled()) return;
     [...files].slice(0, 6).forEach(readShot);
+  }
+
+  if (!V.enabled()) {
+    $('shots').disabled = true;
+    $('drop').classList.add('off');
+    $('drop').append(el('p', { class: 'shot-off', 'data-i18n': 'shot.off', text: t('shot.off') }));
   }
 
   $('shots').addEventListener('change', (e) => {
@@ -311,7 +328,7 @@
   const drop = $('drop');
   ['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => {
     e.preventDefault();
-    drop.classList.add('drag');
+    if (V.enabled()) drop.classList.add('drag');
   }));
   ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, () => drop.classList.remove('drag')));
   drop.addEventListener('drop', (e) => {
@@ -323,7 +340,7 @@
   document.addEventListener('paste', (e) => {
     if ($('scan').classList.contains('hidden') || !e.clipboardData) return;
     const images = [...e.clipboardData.files].filter((f) => /^image\//.test(f.type));
-    if (!images.length) return;
+    if (!images.length || !V.enabled()) return;
     e.preventDefault();
     addFiles(images);
   });

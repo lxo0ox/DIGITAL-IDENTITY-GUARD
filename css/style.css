@@ -258,3 +258,15 @@ ul.factors blockquote {
 .shot-bar { height: 6px; background: #ffffff14; border-radius: 6px; overflow: hidden; margin-top: 4px; }
 .shot-bar div { height: 100%; width: 0; background: var(--teal); transition: width .3s; }
 .shot-found { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+/* ---------- v3b: AI screenshot reader ---------- */
+.drop.off .drop-btn { opacity: .45; cursor: not-allowed; }
+.shot-off { color: #ffcf7a; font-size: 13px; }
+.shot-bar.busy div { width: 35%; animation: shotbusy 1.2s ease-in-out infinite; }
+@keyframes shotbusy { 0% { margin-inline-start: -35%; } 100% { margin-inline-start: 100%; } }
+@media (prefers-reduced-motion: reduce) { .shot-bar.busy div { animation: none; width: 100%; opacity: .5; } }
+.shot-dl { display: grid; grid-template-columns: max-content 1fr; gap: 0 10px; margin: 6px 0 0; }
+.shot-dl dt { color: var(--muted); }
+.shot-dl dd { margin: 0; overflow-wrap: anywhere; }
+.shot-warn { color: #ffcf7a; margin: 4px 0 0; }
+.shot-info p { margin: 4px 0 0; }

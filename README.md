@@ -9,15 +9,15 @@ Student project – Ebdaa 2026 · Yazan Omar Alzahrani · Mohannad Ali Alghamdi
 
 ## Run it
 
-Open `index.html` in any browser. There is no build step and no server: every check runs in the browser and nothing you type is sent anywhere. The site never contacts Instagram, X or any other platform.
+Open `index.html` in any browser. There is no build step. Every check runs in the browser and nothing you type is sent anywhere. The site never contacts Instagram, X or any other platform.
 
-The only thing downloaded from outside is the open-source OCR engine ([Tesseract.js](https://github.com/naptha/tesseract.js) 5.1.1 with its Arabic and English language files, about 5 MB from cdn.jsdelivr.net), and only the first time someone uses a screenshot.
+The one exception is the optional **screenshot reader**: when it is switched on, a screenshot the user chooses is sent to the project's server to be read by an AI model. See [Screenshot reader](#screenshot-reader).
 
 ## How a check works
 
 The user enters the account (link or @username) and, optionally, who it claims to be, the verification badge they see, the messages it sent, and anything they noticed.
 
-**Screenshots:** instead of typing, the user can choose, drag or paste (Ctrl+V) screenshots of the profile or chat. The text is read on the device with OCR (the image is never uploaded), added to the text box for the user to check, and any @usernames or profile links found are offered as the account. OCR can confuse similar characters (e.g. `0` and `O`), so the user is asked to check the username letter by letter. The badge colour cannot be read from the image, so the user still picks it.
+**Screenshots:** instead of typing, the user can choose, drag or paste (Ctrl+V) a screenshot of the profile or chat. The AI reader fills in the account, the badge and the other person's messages (the user's own replies are left out), and warns when any letter of the username is unclear. The user checks the fields before analysing.
 
 | Check | What it does | File |
 | --- | --- | --- |
@@ -64,14 +64,49 @@ Until an organisation's accounts are added, users can still confirm an account b
 | `js/messages.js` | Message scam analyser |
 | `js/official-accounts.js` | Official accounts directory |
 | `js/guard.js` | Identity and badge checks, final result |
-| `js/ocr.js` | Reads text from screenshots in the browser (Tesseract.js) |
+| `js/config.js` | Site settings: the screenshot reader's address (nothing secret) |
+| `js/vision.js` | Sends a screenshot to the reader and turns the reply into form values |
+| `server/` | The screenshot reader: a Cloudflare Worker that calls the Claude API |
 | `js/i18n.js` | Arabic and English text |
 | `js/app.js` | Navigation, language switch, examples, report |
 | `tests/` | Tests for the checks |
-| `docs/` | Project methodology document |
+| `docs/` | Project methodology document, and notes on the screenshot-reading options |
+
+## Screenshot reader
+
+`server/` is a small Cloudflare Worker. The website sends it one screenshot; it asks Claude (`claude-opus-5-5`) to transcribe what is visible into fixed JSON and sends that back. It never decides whether something is a scam: the website's own checks do that. Why we chose this over in-browser OCR is in [docs/screenshot-reading-options.md](docs/screenshot-reading-options.md).
+
+**The API key is never in this repo or the website.** It is stored only as a secret in Cloudflare.
+
+### Switching it on (one time, on your computer)
+
+You need [Node.js](https://nodejs.org) 20 or newer, a free [Cloudflare](https://dash.cloudflare.com/sign-up) account and an [Anthropic Console](https://console.anthropic.com) account.
+
+1. **Create an API key** in the Anthropic Console (API Keys → Create key). Also set a **monthly spend limit** in the Console's limits/billing settings. This is the real protection against unexpected bills.
+2. **Deploy the reader:**
+   ```bash
+   cd server
+   npm install
+   npx wrangler login                          # opens the browser to sign in to Cloudflare
+   npx wrangler secret put ANTHROPIC_API_KEY   # paste the key when asked; it is not shown or saved locally
+   npx wrangler deploy
+   ```
+   The last command prints the reader's address, like `https://dig-screenshot-reader.<name>.workers.dev`.
+3. **Connect the website:** put that address in `js/config.js` (`readerUrl`) and commit it. The address is not secret.
+
+If the site is served from somewhere other than `https://lxo0ox.github.io`, add that address to `ALLOWED_ORIGINS` in `server/wrangler.toml` and deploy again.
+
+### Cost and limits
+
+- Each screenshot is one Claude request. With `EFFORT = "high"` (in `server/wrangler.toml`) it costs roughly a few US cents. Check the real numbers in the Console's usage page after a few tries. `medium` is cheaper and faster.
+- The reader only answers requests from the addresses in `ALLOWED_ORIGINS`, accepts images up to 5 MB, and allows each visitor 10 screenshots a minute. A script could still call it directly, so keep the Console spend limit on.
+- Screenshots are sent to Anthropic's API for processing. The reader itself stores nothing.
 
 ## Tests
 
 ```bash
-node --test
+node --test                  # website checks and the reader's request handling
+cd server && npm test        # the reader only
 ```
+
+The reader's tests replace Claude with a fixed reply, so they need no API key.
