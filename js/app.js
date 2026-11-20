@@ -100,6 +100,7 @@
   document.querySelectorAll('[data-example]').forEach((b) => b.addEventListener('click', () => {
     const ex = EXAMPLES[b.dataset.example];
     $('scan-form').reset();
+    clearShots();
     $('account').value = ex.account;
     $('claim').value = ex.claim();
     $('messages').value = ex.messages();
@@ -225,6 +226,115 @@
     renderSignals(r);
   }
 
+  // ---------------------------------------------------- screenshots ---
+
+  const shotUrls = [];
+  let shotQueue = Promise.resolve();
+
+  function appendText(text) {
+    const box = $('messages');
+    box.value = box.value.trim() ? box.value.trim() + '\n\n' + text : text;
+  }
+
+  function showCandidates(accounts) {
+    const wrap = $('shot-cands');
+    accounts.forEach((acc) => {
+      if ([...wrap.children].some((b) => b.dataset.value === acc)) return;
+      const b = el('button', { type: 'button', class: 'chip', 'data-value': acc }, [bdi(acc)]);
+      b.addEventListener('click', () => {
+        $('account').value = acc;
+        $('account').dispatchEvent(new Event('input'));
+        $('account').focus();
+      });
+      wrap.append(b);
+    });
+    $('shot-found').classList.toggle('hidden', !wrap.children.length);
+  }
+
+  function readShot(file) {
+    const url = URL.createObjectURL(file);
+    shotUrls.push(url);
+    const status = el('span', { class: 'shot-status' });
+    const bar = el('div', { class: 'shot-bar' }, [el('div')]);
+    const li = el('li', { class: 'shot' }, [
+      el('img', { src: url, alt: '' }),
+      el('div', { class: 'shot-info' }, [el('span', { class: 'shot-name', text: file.name || 'screenshot' }), status, bar]),
+    ]);
+    $('shot-list').append(li);
+
+    if (!/^image\//.test(file.type)) {
+      status.textContent = t('shot.notImage');
+      li.classList.add('shot-failed');
+      bar.remove();
+      return;
+    }
+    status.textContent = t('shot.loading', { p: 0 });
+
+    // One screenshot at a time, in the order they were added.
+    shotQueue = shotQueue.then(async () => {
+      try {
+        const res = await window.DIGOcr.read(file, (stage, p) => {
+          const pct = Math.round(p * 100);
+          status.textContent = t('shot.' + stage, { p: pct });
+          bar.firstChild.style.width = (stage === 'reading' ? pct : Math.min(pct, 100) / 4) + '%';
+        });
+        bar.remove();
+        if (!res.text) {
+          status.textContent = t('shot.empty');
+          li.classList.add('shot-failed');
+          return;
+        }
+        appendText(res.text);
+        status.textContent = t('shot.done', { n: res.text.split('\n').length });
+        li.classList.add('shot-ok');
+        // Fill the account only when exactly one @username or link was found.
+        if (!$('account').value.trim() && res.accounts.sure.length === 1) $('account').value = res.accounts.sure[0];
+        showCandidates(res.accounts.sure.concat(res.accounts.maybe));
+        if (!li.querySelector('.shot-note')) li.querySelector('.shot-info').append(el('span', { class: 'shot-note muted', text: t('shot.badgeNote') }));
+      } catch (e) {
+        bar.remove();
+        status.textContent = t('shot.error');
+        li.classList.add('shot-failed');
+      }
+    });
+  }
+
+  function addFiles(files) {
+    [...files].slice(0, 6).forEach(readShot);
+  }
+
+  $('shots').addEventListener('change', (e) => {
+    addFiles(e.target.files);
+    e.target.value = '';
+  });
+
+  const drop = $('drop');
+  ['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => {
+    e.preventDefault();
+    drop.classList.add('drag');
+  }));
+  ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, () => drop.classList.remove('drag')));
+  drop.addEventListener('drop', (e) => {
+    e.preventDefault();
+    if (e.dataTransfer && e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+  });
+
+  // Paste a screenshot straight from the clipboard while on the scan page.
+  document.addEventListener('paste', (e) => {
+    if ($('scan').classList.contains('hidden') || !e.clipboardData) return;
+    const images = [...e.clipboardData.files].filter((f) => /^image\//.test(f.type));
+    if (!images.length) return;
+    e.preventDefault();
+    addFiles(images);
+  });
+
+  function clearShots() {
+    shotUrls.splice(0).forEach((u) => URL.revokeObjectURL(u));
+    $('shot-list').replaceChildren();
+    $('shot-cands').replaceChildren();
+    $('shot-found').classList.add('hidden');
+  }
+
   // ------------------------------------------------------- form flow ---
 
   let lastInput = {};
@@ -265,6 +375,7 @@
 
   $('reset').addEventListener('click', () => {
     $('scan-form').reset();
+    clearShots();
     lastResult = null;
     lastInput = {};
     $('report').classList.add('hidden');

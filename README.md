@@ -11,9 +11,13 @@ Student project – Ebdaa 2026 · Yazan Omar Alzahrani · Mohannad Ali Alghamdi
 
 Open `index.html` in any browser. There is no build step and no server: every check runs in the browser and nothing you type is sent anywhere. The site never contacts Instagram, X or any other platform.
 
+The only thing downloaded from outside is the open-source OCR engine ([Tesseract.js](https://github.com/naptha/tesseract.js) 5.1.1 with its Arabic and English language files, about 5 MB from cdn.jsdelivr.net), and only the first time someone uses a screenshot.
+
 ## How a check works
 
 The user enters the account (link or @username) and, optionally, who it claims to be, the verification badge they see, the messages it sent, and anything they noticed.
+
+**Screenshots:** instead of typing, the user can choose, drag or paste (Ctrl+V) screenshots of the profile or chat. The text is read on the device with OCR (the image is never uploaded), added to the text box for the user to check, and any @usernames or profile links found are offered as the account. OCR can confuse similar characters (e.g. `0` and `O`), so the user is asked to check the username letter by letter. The badge colour cannot be read from the image, so the user still picks it.
 
 | Check | What it does | File |
 | --- | --- | --- |
@@ -60,6 +64,7 @@ Until an organisation's accounts are added, users can still confirm an account b
 | `js/messages.js` | Message scam analyser |
 | `js/official-accounts.js` | Official accounts directory |
 | `js/guard.js` | Identity and badge checks, final result |
+| `js/ocr.js` | Reads text from screenshots in the browser (Tesseract.js) |
 | `js/i18n.js` | Arabic and English text |
 | `js/app.js` | Navigation, language switch, examples, report |
 | `tests/` | Tests for the checks |

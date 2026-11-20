@@ -57,6 +57,20 @@
 
     <form id="scan-form" novalidate>
       <fieldset>
+        <legend data-i18n="shot.legend"></legend>
+        <div class="drop" id="drop">
+          <input type="file" id="shots" accept="image/*" multiple class="sr-only">
+          <label for="shots" class="drop-btn">📷 <span data-i18n="shot.choose"></span></label>
+          <p class="muted" data-i18n="shot.hint"></p>
+        </div>
+        <ul class="shot-list" id="shot-list" aria-live="polite"></ul>
+        <div class="shot-found hidden" id="shot-found">
+          <span class="muted" data-i18n="shot.found"></span>
+          <span id="shot-cands"></span>
+        </div>
+      </fieldset>
+
+      <fieldset>
         <legend data-i18n="scan.step1"></legend>
         <label class="field" for="account" data-i18n="scan.accountLabel"></label>
         <input id="account" class="ltr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
@@ -172,6 +186,7 @@
 <script src="js/messages.js"></script>
 <script src="js/official-accounts.js"></script>
 <script src="js/guard.js"></script>
+<script src="js/ocr.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/app.js"></script>
 </body>
