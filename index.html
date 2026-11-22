@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Digital Identity Guard – an awareness tool that explains the warning signs of fake and impersonating accounts.">
 <title>حارس الهوية الرقمية | Digital Identity Guard</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+<link rel="icon" href="images/logo.svg" type="image/svg+xml">
+<link rel="icon" href="images/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#101b2c">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -15,9 +19,13 @@
   </div>
 
   <header class="hero">
-    <div class="logo" aria-hidden="true">🛡️</div>
-    <h1>DIGITAL IDENTITY GUARD</h1>
-    <div class="sub" data-i18n="brand.sub">حارس الهوية الرقمية</div>
+    <div class="brand">
+      <img class="logo" src="images/logo.svg" width="72" height="72" alt="">
+      <div>
+        <h1>DIGITAL IDENTITY GUARD</h1>
+        <div class="sub" data-i18n="brand.sub">حارس الهوية الرقمية</div>
+      </div>
+    </div>
     <h2 data-i18n="hero.title">احمِ هويتك الرقمية</h2>
     <p data-i18n="hero.text"></p>
     <button type="button" class="primary" id="start" data-i18n="hero.cta"></button>
@@ -176,7 +184,8 @@
   </section>
 
   <footer>
-    🛡️ DIGITAL IDENTITY GUARD<br>
+    <img class="footer-logo" src="images/logo.svg" width="28" height="28" alt=""><br>
+    DIGITAL IDENTITY GUARD<br>
     Yazan Omar Alzahrani · Mohannad Ali Alghamdi<br>
     <span data-i18n="footer.project"></span>
   </footer>
