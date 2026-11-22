@@ -6,5 +6,5 @@
  * Leave it empty to switch screenshot reading off.
  */
 window.DIG_CONFIG = {
-  readerUrl: '',
+  readerUrl: 'https://dig-screenshot-reader.digital-identity-guard.workers.dev',
 };
