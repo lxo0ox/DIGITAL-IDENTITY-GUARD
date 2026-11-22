@@ -270,3 +270,4 @@ ul.factors blockquote {
 .shot-dl dd { margin: 0; overflow-wrap: anywhere; }
 .shot-warn { color: #ffcf7a; margin: 4px 0 0; }
 .shot-info p { margin: 4px 0 0; }
+.shot-found .chip { max-width: 100%; overflow-wrap: anywhere; text-align: start; }
